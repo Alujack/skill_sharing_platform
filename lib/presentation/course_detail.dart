@@ -41,16 +41,22 @@ class CourseDetailPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('(2k ratings) 236k Students',
-                      style: TextStyle(color: Colors.grey[600])),
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                      )),
                 ],
               ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Text('Created by ',
-                      style: TextStyle(color: Colors.grey[700])),
+                      style: TextStyle(
+                          color: const Color.fromARGB(255, 0, 0, 0),
+                          fontWeight: FontWeight.bold)),
                   const Text('Yoeurn Yan',
-                      style: TextStyle(color: Colors.blue)),
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 13, 0, 199),
+                          fontWeight: FontWeight.bold)),
                 ],
               ),
               Row(
@@ -147,7 +153,6 @@ class CourseDetailPage extends StatelessWidget {
     );
   }
 }
-
 
 class CourseContent extends StatelessWidget {
   final List<String> sections = [
