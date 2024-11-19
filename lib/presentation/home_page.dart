@@ -7,17 +7,18 @@ class FeaturedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Welcome, Yoeurn Yan'),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(0.1),
+        child: AppBar(),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const UserProfile(),
-              const SizedBox(height: 20),
+              Image.asset('assets/images/banner.png'),
               const Text(
                 'Learning that fits',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),

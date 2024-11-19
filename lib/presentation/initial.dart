@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import '../widgets/bottom_bar.dart';
 import 'home_page.dart';
 import 'search_page.dart';
-import './my_course_learning.dart';
+import 'my_course.dart';
 import './account_profile.dart';
+import './favourite_page.dart';
 
 // Home Screen with Bottom Navigation Bar
 class Core extends StatefulWidget {
@@ -39,9 +40,9 @@ class _HomeScreenState extends State<Core> {
       case 1:
         return const SearchScreen();
       case 2:
-        return const MyCourseLearning();
+        return const CourseScreen();
       case 3:
-        return const FeaturedPage();
+        return const FavouritePage();
       case 4:
         return const AccountPage();
       default:

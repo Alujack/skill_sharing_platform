@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import '../widgets/video_player.dart';
 
 class MyCourseLearning extends StatelessWidget {
   const MyCourseLearning({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Course Details'),
+        title: const SizedBox(height: 10),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
@@ -21,7 +21,7 @@ class MyCourseLearning extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.asset('assets/images/course_banner.png'),
+              VideoPlayerWidget(videoUrl: 'assets/videos/NextJsOverview.mp4'),
               const SizedBox(height: 10),
               const Text(
                 'Modern JavaScript From The Beginning to advance 2.0 (2024)',

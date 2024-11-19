@@ -1,7 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:skill_sharing_platform/widgets/video_player.dart'; // Assuming this contains your custom VideoPlayerWidget
+import 'package:video_player/video_player.dart';
 
-class CourseDetailPage extends StatelessWidget {
+class CourseDetailPage extends StatefulWidget {
   const CourseDetailPage({super.key});
+
+  @override
+  _CourseDetailPageState createState() => _CourseDetailPageState();
+}
+
+class _CourseDetailPageState extends State<CourseDetailPage> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the video player controller with a sample video
+    _controller =
+        VideoPlayerController.asset('assets/videos/NextJsOverview.mp4')
+          ..initialize().then((_) {
+            setState(() {}); // Ensure the first frame is shown
+          });
+    _controller.setLooping(true); // Loop the video
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Dispose the controller when not needed
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +48,9 @@ class CourseDetailPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.asset('assets/images/course_banner.png'),
+              VideoPlayerWidget(
+                  videoUrl:
+                      'assets/videos/NextJsOverview.mp4'), // Custom video player
               const SizedBox(height: 10),
               const Text(
                 'Modern JavaScript From The Beginning to advance 2.0 (2024)',
@@ -41,22 +70,16 @@ class CourseDetailPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('(2k ratings) 236k Students',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      )),
+                      style: TextStyle(color: Colors.grey[600])),
                 ],
               ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Text('Created by ',
-                      style: TextStyle(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          fontWeight: FontWeight.bold)),
+                      style: TextStyle(color: Colors.grey[700])),
                   const Text('Yoeurn Yan',
-                      style: TextStyle(
-                          color: Color.fromARGB(255, 13, 0, 199),
-                          fontWeight: FontWeight.bold)),
+                      style: TextStyle(color: Colors.blue)),
                 ],
               ),
               Row(
@@ -95,7 +118,7 @@ class CourseDetailPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 14, 0, 212),
+                  backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
                 child: const Center(
