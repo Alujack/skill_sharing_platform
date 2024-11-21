@@ -118,7 +118,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: const Color.fromARGB(255, 35, 0, 210),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
                 child: const Center(

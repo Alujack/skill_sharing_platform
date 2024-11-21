@@ -7,8 +7,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  final ApiService apiService = ApiService('https://fakestoreapi.com/products');
-
   MyApp({super.key});
 
   @override
