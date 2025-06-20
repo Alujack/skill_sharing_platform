@@ -45,6 +45,11 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
+      if (loginResponse["statusCode"] == 200) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const Core()),
+        );
+      }
 
       // Store token securely
       const storage = FlutterSecureStorage();
@@ -59,21 +64,15 @@ class _LoginScreenState extends State<LoginScreen> {
       await _storeUserData(userResponse);
 
       // Navigate to Core screen
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Core()),
-        );
-      }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_getErrorMessage(e)),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      // if (mounted) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text(_getErrorMessage(e)),
+      //       behavior: SnackBarBehavior.floating,
+      //     ),
+      //   );
+      // }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

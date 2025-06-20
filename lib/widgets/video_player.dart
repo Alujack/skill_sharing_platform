@@ -17,16 +17,17 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   void initState() {
     super.initState();
     // Initialize the video player controller with the given URL
-    _controller = VideoPlayerController.asset(widget.videoUrl)
-      ..initialize().then((_) {
-        setState(() {}); // Ensure the first frame is shown
-      });
-    _controller.setLooping(true); // Loop the video
+    _controller =
+        VideoPlayerController.asset("assets/videos/NextJsOverview.mp4")
+          ..initialize().then((_) {
+            setState(() {}); 
+          });
+    _controller.setLooping(true); 
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose the controller when not needed
+    _controller.dispose();
     super.dispose();
   }
 
@@ -46,7 +47,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           )
         : const Center(
             child:
-                CircularProgressIndicator()); // Show loading spinner until initialized
+                CircularProgressIndicator());
   }
 }
 
@@ -77,7 +78,6 @@ class _ControlsOverlay extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.fullscreen, color: Colors.white),
               onPressed: () {
-                // Add your fullscreen functionality here if needed
               },
             ),
           ),

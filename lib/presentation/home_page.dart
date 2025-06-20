@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'course_detail.dart';
+import 'package:skill_sharing_platform/services/categories_service.dart';
+import 'package:skill_sharing_platform/services//course_service.dart';
 
 class FeaturedPage extends StatelessWidget {
   const FeaturedPage({super.key});
@@ -119,29 +121,60 @@ class UserProfile extends StatelessWidget {
   }
 }
 
-class CourseRecommendation extends StatelessWidget {
+class CourseRecommendation extends StatefulWidget {
   const CourseRecommendation({super.key});
 
   @override
+  State<CourseRecommendation> createState() => _CourseRecommendationState();
+}
+
+class _CourseRecommendationState extends State<CourseRecommendation> {
+  List<dynamic> courses = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCourses();
+  }
+
+  Future<void> _fetchCourses() async {
+    try {
+      final data = await CoursesService.getAllCourses();
+      setState(() {
+        courses = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error loading courses: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          CourseCard(),
-          SizedBox(width: 10), // Add spacing between cards
-          CourseCard(),
-          SizedBox(width: 10), // Add spacing between cards
-          CourseCard(),
-          SizedBox(width: 10), // Add more CourseCards as needed
-        ],
-      ),
-    );
+    return isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: courses.map((course) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: CourseCard(course: course),
+                );
+              }).toList(),
+            ),
+          );
   }
 }
 
 class CourseCard extends StatelessWidget {
-  const CourseCard({super.key});
+  final dynamic course;
+
+  const CourseCard({super.key, required this.course});
 
   @override
   Widget build(BuildContext context) {
@@ -159,12 +192,29 @@ class CourseCard extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const CourseDetailPage()),
+                    builder: (context) =>
+                        CourseDetailPage(courseId: course['id']),
+                  ),
                 );
               },
-              child: Image.asset(
-                'assets/images/course.png', // Replace with your course image asset
-                fit: BoxFit.cover,
+              child: Container(
+                height: 120,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(8)),
+                  color: Colors.grey[300],
+                ),
+                child: course['image'] != null
+                    ? Image.network(
+                        course['image'],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.image,
+                              size: 50, color: Colors.grey);
+                        },
+                      )
+                    : const Icon(Icons.image, size: 50, color: Colors.grey),
               ),
             ),
             Padding(
@@ -174,33 +224,48 @@ class CourseCard extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      // // Navigate to the detail page when the title is tapped
+                      // Navigate to the detail page when the title is tapped
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const CourseDetailPage()),
+                          builder: (context) =>
+                              CourseDetailPage(courseId: course['id']),
+                        ),
                       );
                     },
-                    child: const Text(
-                      'Modern JavaScript From The Beginning 2.0 (2024)',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    child: Text(
+                      course['title'] ?? 'No Title',
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
-                    'Yoeurn Yan',
+                    course['instructor']?['name'] ?? 'Unknown Instructor',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
-                  const Row(
+                  const SizedBox(height: 4),
+                  Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber, size: 16),
-                      Text('5.0 (1,090)', style: TextStyle(fontSize: 12)),
+                      const Icon(Icons.star, color: Colors.amber, size: 16),
+                      Text(
+                        '${course['rating'] ?? '5.0'} (${course['reviews'] ?? '0'})',
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 5),
-                  const Text(
-                    '\$99.99',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Text(
+                    '\$${course['price']?.toStringAsFixed(2) ?? '0.00'}',
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    course['category']?['name'] ?? 'No Category',
+                    style: TextStyle(fontSize: 10, color: Colors.blue[600]),
                   ),
                 ],
               ),
@@ -212,19 +277,56 @@ class CourseCard extends StatelessWidget {
   }
 }
 
-class CategoriesSection extends StatelessWidget {
-  final List<String> categories = [
-    'Development',
-    'Business',
-    'Design',
-    'Marketing',
-    'IT & Software',
-    'Personal Development',
-    'Photography',
-    'Music',
-  ];
+class CourseDetailPage extends StatelessWidget {
+  final int courseId;
 
-  CategoriesSection({super.key});
+  const CourseDetailPage({super.key, required this.courseId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Course Details'),
+      ),
+      body: const Center(
+        child: Text('Course Detail Page - Use the updated version'),
+      ),
+    );
+  }
+}
+
+class CategoriesSection extends StatefulWidget {
+  const CategoriesSection({super.key});
+
+  @override
+  State<CategoriesSection> createState() => _CategoriesSectionState();
+}
+
+class _CategoriesSectionState extends State<CategoriesSection> {
+  List<dynamic> categories = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    try {
+      final data = await CategoriesService.getAllCategories();
+      print("data == ${data}");
+      setState(() {
+        categories = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error loading categories: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,27 +354,31 @@ class CategoriesSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: categories.map((category) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: OutlinedButton(
-                    onPressed: () {
-                      // Handle category click
-                    },
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Text(category),
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: categories.map((category) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: OutlinedButton(
+                          onPressed: () {
+                            // Handle category click
+                            print(
+                                'Selected: ${category['name']} (ID: ${category['id']})');
+                          },
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text(category['name']),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
+                ),
         ],
       ),
     );

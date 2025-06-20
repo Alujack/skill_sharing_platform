@@ -166,7 +166,7 @@ class _SearchScreenState extends State<SearchScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CourseDetailPage(),
+            builder: (context) => CourseDetailPage(courseId: 4,),
           ),
         );
       },

@@ -1,70 +1,55 @@
-import 'dart:convert';
+// lib/services/api_service.dart
+
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import './constants//app_constant.dart';
 
 class ApiService {
-  final String baseUrl;
+  // Generic GET request
+  static Future<dynamic> get(String endpoint) async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+            '${AppConstants.baseUrl}/${AppConstants.apiVersion}/$endpoint'),
+        headers: AppConstants.defaultHeaders,
+      );
 
-  ApiService(this.baseUrl);
-
-  // GET request
-  Future<http.Response> getData(String endpoint) async {
-    final url = Uri.parse('$baseUrl/$endpoint');
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      print("GET Success: ${response.body}");
-    } else {
-      print("GET Error: ${response.statusCode}");
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
     }
-    return response;
   }
 
-  // POST request
-  Future<http.Response> postData(
+  // Generic POST request
+  static Future<dynamic> post(
       String endpoint, Map<String, dynamic> data) async {
-    final url = Uri.parse('$baseUrl/$endpoint');
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(data),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(
+            '${AppConstants.baseUrl}/${AppConstants.apiVersion}/$endpoint'),
+        headers: AppConstants.defaultHeaders,
+        body: json.encode(data),
+      );
 
-    if (response.statusCode == 201) {
-      print("POST Success: ${response.body}");
-    } else {
-      print("POST Error: ${response.statusCode}");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to post data');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
     }
-    return response;
   }
 
-  // PUT request
-  Future<http.Response> putData(
-      String endpoint, Map<String, dynamic> data) async {
-    final url = Uri.parse('$baseUrl/$endpoint');
-    final response = await http.put(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(data),
-    );
-
-    if (response.statusCode == 200) {
-      print("PUT Success: ${response.body}");
-    } else {
-      print("PUT Error: ${response.statusCode}");
-    }
-    return response;
-  }
-
-  // DELETE request
-  Future<http.Response> deleteData(String endpoint) async {
-    final url = Uri.parse('$baseUrl/$endpoint');
-    final response = await http.delete(url);
-
-    if (response.statusCode == 200) {
-      print("DELETE Success: ${response.body}");
-    } else {
-      print("DELETE Error: ${response.statusCode}");
-    }
-    return response;
+  // Add authentication token to headers
+  static Map<String, String> getAuthHeaders(String token) {
+    return {
+      ...AppConstants.defaultHeaders,
+      'Authorization': 'Bearer $token',
+    };
   }
 }
