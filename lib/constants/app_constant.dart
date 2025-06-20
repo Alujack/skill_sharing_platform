@@ -4,11 +4,25 @@ class AppConstants {
   // API Configuration
   static const String baseUrl = 'http://192.168.123.192:4000';
   static const String apiVersion = 'v1';
+  static const String apiPrefix = '$baseUrl/$apiVersion';
 
   // API Endpoints
-  static const String categoriesEndpoint = '$baseUrl/$apiVersion/categories';
-  static const String coursesEndpoint = '$baseUrl/$apiVersion/courses';
-  static const String usersEndpoint = '$baseUrl/$apiVersion/users';
+  static const String authEndpoint = '$apiPrefix/auth';
+  static const String coursesEndpoint = '$apiPrefix/courses';
+  static const String enrollmentsEndpoint = '$apiPrefix/enrollments';
+  static const String instructorEndpoint = '$apiPrefix/instructor';
+  static const String studentEndpoint = '$apiPrefix/student';
+  static const String usersEndpoint = '$apiPrefix/users';
+  static const String dashboardEndpoint = '$apiPrefix/dashboard';
+  static const String categoriesEndpoint = '$apiPrefix/categories';
+  static const String lessonEndpoint = '$apiPrefix/lesson';
+
+  // Auth Endpoints
+  static String loginEndpoint = '$authEndpoint/login';
+  static String registerEndpoint = '$authEndpoint/register';
+  static String refreshTokenEndpoint = '$authEndpoint/refresh-token';
+  static String forgotPasswordEndpoint = '$authEndpoint/forgot-password';
+  static String resetPasswordEndpoint = '$authEndpoint/reset-password';
 
   // Other constants
   static const String appName = 'Your App Name';
@@ -22,13 +36,21 @@ class AppConstants {
 
   // Storage Keys
   static const String tokenKey = 'auth_token';
+  static const String refreshTokenKey = 'refresh_token';
   static const String userKey = 'user_data';
 }
 
-// Alternative approach - using environment variables
+// Environment configuration (alternative approach)
 class Environment {
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'http://localhost:3000', // fallback URL
+    defaultValue: 'http://192.168.123.192:4000',
   );
+  
+  static const String apiVersion = String.fromEnvironment(
+    'API_VERSION',
+    defaultValue: 'v1',
+  );
+  
+  static String get apiPrefix => '$baseUrl/$apiVersion';
 }

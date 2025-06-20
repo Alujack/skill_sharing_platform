@@ -26,7 +26,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     _controller =
         VideoPlayerController.asset('assets/videos/NextJsOverview.mp4')
           ..initialize().then((_) {
-            setState(() {});
+            setState(() {}); 
           });
     _controller.setLooping(true); // Loop the video
   }
