@@ -58,21 +58,15 @@ class _LoginScreenState extends State<LoginScreen> {
         value: loginResponse['token'],
       );
 
-      // Get and store user info
-      final userResponse =
-          await AuthService.getCurrentUser(loginResponse['token']);
-      await _storeUserData(userResponse);
-
-      // Navigate to Core screen
     } catch (e) {
-      // if (mounted) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text(_getErrorMessage(e)),
-      //       behavior: SnackBarBehavior.floating,
-      //     ),
-      //   );
-      // }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_getErrorMessage(e)),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

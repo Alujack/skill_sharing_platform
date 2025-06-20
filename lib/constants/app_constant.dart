@@ -2,7 +2,7 @@
 
 class AppConstants {
   // API Configuration
-  static const String baseUrl = 'http://192.168.123.192:4000';
+  static const String baseUrl = 'http://192.168.1.184:4000';
   static const String apiVersion = 'v1';
   static const String apiPrefix = '$baseUrl/$apiVersion';
 
@@ -23,6 +23,7 @@ class AppConstants {
   static String refreshTokenEndpoint = '$authEndpoint/refresh-token';
   static String forgotPasswordEndpoint = '$authEndpoint/forgot-password';
   static String resetPasswordEndpoint = '$authEndpoint/reset-password';
+  static String getCurrentUser = '$authEndpoint/me';
 
   // Other constants
   static const String appName = 'Your App Name';

@@ -6,7 +6,7 @@ class CoursesService {
   static Future<List<dynamic>> getAllCourses() async {
     try {
       final response = await http.get(
-        Uri.parse(AppConstants.courses),
+        Uri.parse(AppConstants.coursesEndpoint),
         headers: AppConstants.defaultHeaders,
       );
 
@@ -24,7 +24,7 @@ class CoursesService {
   static Future<dynamic> getCourseById(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('${AppConstants.courses}/$id'),
+        Uri.parse('${AppConstants.coursesEndpoint}/$id'),
         headers: AppConstants.defaultHeaders,
       );
 
@@ -42,7 +42,7 @@ class CoursesService {
   static Future<List<dynamic>> getInstructorCourses(int instructorId) async {
     try {
       final response = await http.get(
-        Uri.parse('${AppConstants.courses}/instructor/$instructorId'),
+        Uri.parse('${AppConstants.coursesEndpoint}/instructor/$instructorId'),
         headers: AppConstants.defaultHeaders,
       );
 

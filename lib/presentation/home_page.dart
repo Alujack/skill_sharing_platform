@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'course_detail.dart';
 import 'package:skill_sharing_platform/services/categories_service.dart';
 import 'package:skill_sharing_platform/services//course_service.dart';
 
@@ -315,7 +314,6 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   Future<void> _fetchCategories() async {
     try {
       final data = await CategoriesService.getAllCategories();
-      print("data == ${data}");
       setState(() {
         categories = data;
         isLoading = false;
