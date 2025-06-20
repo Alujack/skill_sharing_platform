@@ -6,7 +6,7 @@ class CategoriesService {
   static Future<List<dynamic>> getAllCategories() async {
     try {
       final response = await http.get(
-        Uri.parse(AppConstants.categoriesEndpoint),
+        Uri.parse('${AppConstants.categoriesEndpoint}'),
         headers: AppConstants.defaultHeaders,
       );
 
@@ -14,7 +14,7 @@ class CategoriesService {
         final data = json.decode(response.body);
         return data;
       } else {
-        throw Exception('Failed to load courses');
+        throw Exception('Failed to load course');
       }
     } catch (e) {
       throw Exception('Error: $e');

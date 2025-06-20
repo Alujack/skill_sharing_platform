@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:skill_sharing_platform/services/categories_service.dart';
 import 'package:skill_sharing_platform/services//course_service.dart';
+import 'package:skill_sharing_platform/presentation/course_detail.dart';
 
 class FeaturedPage extends StatelessWidget {
   const FeaturedPage({super.key});
@@ -271,24 +272,6 @@ class CourseCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class CourseDetailPage extends StatelessWidget {
-  final int courseId;
-
-  const CourseDetailPage({super.key, required this.courseId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Course Details'),
-      ),
-      body: const Center(
-        child: Text('Course Detail Page - Use the updated version'),
       ),
     );
   }

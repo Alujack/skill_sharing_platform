@@ -57,21 +57,8 @@ class _LoginScreenState extends State<LoginScreen> {
         key: 'auth_token',
         value: loginResponse['token'],
       );
-
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_getErrorMessage(e)),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    // ignore: empty_catches
+    } catch (e) {}
   }
 
   Future<void> _storeUserData(Map<String, dynamic> userData) async {
