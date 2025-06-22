@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:skill_sharing_platform/services/categories_service.dart';
 import 'package:skill_sharing_platform/services//course_service.dart';
 import 'package:skill_sharing_platform/presentation/course_detail.dart';
+import 'package:provider/provider.dart';
+import 'package:skill_sharing_platform/auth_provider.dart';
 
 class FeaturedPage extends StatelessWidget {
   const FeaturedPage({super.key});
@@ -89,10 +91,11 @@ class FeaturedPage extends StatelessWidget {
 
 class UserProfile extends StatelessWidget {
   const UserProfile({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.user;
+    return Row(
       children: [
         CircleAvatar(
           radius: 30,
@@ -103,7 +106,7 @@ class UserProfile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Welcome, Yoeurn Yan',
+              "Welcome, ${user?.name ?? user?.email}",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Text(
@@ -198,24 +201,30 @@ class CourseCard extends StatelessWidget {
                 );
               },
               child: Container(
-                height: 120,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(8)),
-                  color: Colors.grey[300],
-                ),
-                child: course['image'] != null
-                    ? Image.network(
-                        course['image'],
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.image,
-                              size: 50, color: Colors.grey);
-                        },
-                      )
-                    : const Icon(Icons.image, size: 50, color: Colors.grey),
-              ),
+                  height: 120,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(8)),
+                    color: Colors.grey[300],
+                  ),
+                  child: course['image'] != null
+                      ? Image.network(
+                          course['image'],
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.image,
+                                size: 50, color: Colors.grey);
+                          },
+                        )
+                      : Image.asset(
+                          'assets/images/course.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.image,
+                                size: 50, color: Colors.grey);
+                          },
+                        )),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),

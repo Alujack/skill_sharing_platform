@@ -11,8 +11,6 @@ class EnrollmentService {
         body: jsonEncode({'courseId': courseId, 'userId': userId}),
       );
 
-      print('Response: ${response.statusCode} - ${response.body}');
-
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
         return data;
@@ -20,7 +18,6 @@ class EnrollmentService {
         throw Exception('Failed to enroll, status: ${response.statusCode}');
       }
     } catch (e) {
-      print('Enrollment error: $e');
       throw Exception(e.toString());
     }
   }

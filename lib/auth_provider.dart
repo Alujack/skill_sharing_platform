@@ -16,7 +16,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> initialize() async {
     try {
-      // Simulate some delay for demonstration (remove in production)
+
       await Future.delayed(Duration(milliseconds: 500));
       
       _token = await const FlutterSecureStorage().read(key: 'auth_token');
@@ -26,8 +26,6 @@ class AuthProvider with ChangeNotifier {
         _user = UserModel.fromJson(jsonDecode(userString));
       }
     } catch (e) {
-      print("Initialization error: $e");
-      // Clear invalid credentials
       await logout();
     } finally {
       _isInitialized = true;

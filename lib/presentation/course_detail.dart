@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_sharing_platform/auth_provider.dart';
-import 'package:skill_sharing_platform/presentation/initial.dart';
-import 'package:skill_sharing_platform/presentation/my_course_learning.dart';
+import 'package:skill_sharing_platform/presentation/favourite_page.dart';
 import 'package:skill_sharing_platform/services/enrollment_service.dart';
 import 'package:skill_sharing_platform/widgets/video_player.dart';
 import 'package:video_player/video_player.dart';
 import 'package:skill_sharing_platform/services/course_service.dart';
+import 'package:skill_sharing_platform/services/favourite_service.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final int courseId;
@@ -14,6 +14,7 @@ class CourseDetailPage extends StatefulWidget {
   const CourseDetailPage({super.key, required this.courseId});
 
   @override
+  // ignore: library_private_types_in_public_api
   _CourseDetailPageState createState() => _CourseDetailPageState();
 }
 
@@ -207,24 +208,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       return;
                     }
 
-                    print(
-                        'Enrolling user $userId into course ${widget.courseId}');
-
                     await EnrollmentService.buyNowEnroll(
                         widget.courseId.toString(), userId);
 
+                    // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Enrollment successful!')),
                     );
-
-                    // Navigate after a short delay
-                    Future.delayed(const Duration(milliseconds: 1500), () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                            builder: (context) => MyCourseLearning(courseId: 3,)),
-                      );
-                    });
                   } catch (e) {
+                    // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Enrollment failed: $e')),
                     );
@@ -235,13 +227,46 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: const Text(
-                  'Buy now',
+                  'Enroll for free',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
               const SizedBox(height: 10),
               OutlinedButton(
-                onPressed: () {},
+                onPressed: () async {
+                  try {
+                    final authProvider =
+                        Provider.of<AuthProvider>(context, listen: false);
+                    final userId = authProvider.user?.id;
+                    if (userId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please login first')),
+                      );
+                      return;
+                    }
+                    await FavouriteService.addtofavourite(
+                        widget.courseId.toString(), userId);
+
+                    // ignore: use_build_context_synchronously
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Add to favourite')),
+                    );
+
+                    // Navigate after a short delay
+                    Future.delayed(const Duration(milliseconds: 1500), () {
+                      // ignore: use_build_context_synchronously
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) => FavouritePage()),
+                      );
+                    });
+                  } catch (e) {
+                    // ignore: use_build_context_synchronously
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Add favourite failed: $e')),
+                    );
+                  }
+                },
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                 ),

@@ -16,6 +16,7 @@ class AppConstants {
   static const String dashboardEndpoint = '$apiPrefix/dashboard';
   static const String categoriesEndpoint = '$apiPrefix/categories';
   static const String lessonEndpoint = '$apiPrefix/lesson';
+  static const String wishlistEndpoint = '$apiPrefix/wishlist';
 
   // Auth Endpoints
   static String loginEndpoint = '$authEndpoint/login';
@@ -26,7 +27,7 @@ class AppConstants {
   static String getCurrentUser = '$authEndpoint/me';
 
   // Other constants
-  static const String appName = 'Your App Name';
+  static const String appName = 'Skill Sharing platform';
   static const String appVersion = '1.0.0';
 
   // API Headers

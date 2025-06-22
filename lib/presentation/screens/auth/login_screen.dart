@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skill_sharing_platform/auth_provider.dart';
 import 'package:skill_sharing_platform/services/auth_service.dart';
 import 'package:skill_sharing_platform/presentation/screens/auth/signup_screen.dart';
 import 'package:skill_sharing_platform/widgets/custom_textfield.dart';
-import 'package:skill_sharing_platform/presentation/initial.dart';
+import 'package:skill_sharing_platform/auth_wrapper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -21,12 +19,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _passwordVisible = false;
-  final FocusNode _passwordFocusNode = FocusNode(); // Added focus node
-
+  final FocusNode _passwordFocusNode = FocusNode();
   @override
   void initState() {
     super.initState();
-    // Optional: Auto-focus email field after a small delay
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         FocusScope.of(context).requestFocus(FocusNode());
@@ -41,32 +37,20 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
 
-      if (loginResponse["statusCode"] == 200) {
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      // Notify AuthProvider to update its state (usually sets user + isAuthenticated)
+      await Provider.of<AuthProvider>(context, listen: false).initialize();
 
-        // Make sure you're passing the correct user data structure
-        await authProvider.login(
-          loginResponse['data']['token'],
-          loginResponse['data']['user'], // Verify this path is correct
-        );
-
-        Navigator.pushReplacementNamed(context, '/core');
-      }
+      // Navigate to AuthWrapper
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const AuthWrapper()),
+        (route) => false, // Remove all previous routes
+      );
     } catch (e) {
       print("Login error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_getErrorMessage(e))),
       );
     }
-  }
-
-  Future<void> _storeUserData(Map<String, dynamic> userData) async {
-    final prefs = await SharedPreferences.getInstance();
-    await Future.wait([
-      prefs.setString('user_email', userData['email'] ?? ''),
-      prefs.setString('user_name', userData['name'] ?? ''),
-      prefs.setString('user_id', userData['id']?.toString() ?? ''),
-    ]);
   }
 
   String _getErrorMessage(dynamic error) {

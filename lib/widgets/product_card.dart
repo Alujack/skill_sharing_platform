@@ -44,10 +44,10 @@ class ProductCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    product['author'],
-                    style: const TextStyle(color: Colors.grey),
-                  ),
+                  // Text(
+                  //   product['author'],
+                  //   style: const TextStyle(color: Colors.grey),
+                  // ),
                   const SizedBox(height: 4),
                   // Rating and Reviews
                   Row(
@@ -68,7 +68,7 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   // Price
                   Text(
-                    product['price'],
+                    product['price'].toString(),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

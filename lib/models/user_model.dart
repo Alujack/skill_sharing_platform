@@ -3,12 +3,14 @@ class UserModel {
   final String id;
   final String name;
   final String email;
+  final String role;
   final String? profileImage;
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
+    required this.role,
     this.profileImage,
   });
 
@@ -17,6 +19,7 @@ class UserModel {
       id: json['id']?.toString() ?? '',
       name: json['name'] ?? '',
       email: json['email'] ?? '',
+      role: json['role'] ?? '',
       profileImage: json['profileImage'],
     );
   }
@@ -25,6 +28,7 @@ class UserModel {
         'id': id,
         'name': name,
         'email': email,
-        'profileImage': profileImage,
+        'role': role,
+        'proileImage': profileImage,
       };
 }

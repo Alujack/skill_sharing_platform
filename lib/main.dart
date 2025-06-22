@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:skill_sharing_platform/presentation/initial.dart';
 import 'package:skill_sharing_platform/presentation/screens/auth/login_screen.dart';
 import 'package:skill_sharing_platform/auth_provider.dart';
+import 'package:skill_sharing_platform/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,36 +33,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/core': (context) => const Core(),
-      },
-    );
-  }
-}
-
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
-        // First check if provider is initialized
-        if (!authProvider.isInitialized) {
-          // Initialize on first build
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            authProvider.initialize();
-          });
-
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        // After initialization, check auth state
-        return authProvider.isAuthenticated
-            ? const Core()
-            : const LoginScreen();
       },
     );
   }

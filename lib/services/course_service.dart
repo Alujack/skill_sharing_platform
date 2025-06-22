@@ -26,7 +26,6 @@ class CoursesService {
     Map<String, dynamic> filters = const {},
   }) async {
     try {
-      // Build query parameters
       final queryParams = <String, String>{};
 
       if (search.isNotEmpty) {
@@ -45,13 +44,9 @@ class CoursesService {
         queryParams['instructorId'] = filters['instructorId'].toString();
       }
 
-      // Build URI with query parameters
       final uri = Uri.parse(AppConstants.coursesEndpoint).replace(
         queryParameters: queryParams.isEmpty ? null : queryParams,
       );
-
-      print('Fetching courses with search: $search and filters: $filters');
-      print('Request URL: $uri');
 
       final response = await http.get(
         uri,
@@ -68,8 +63,6 @@ class CoursesService {
       throw Exception('Error: $e');
     }
   }
-
-  // Optional: Method specifically for search (wrapper around getCourses)
   static Future<List<dynamic>> searchCourses(String query) async {
     return getCourses(search: query);
   }
@@ -107,6 +100,21 @@ class CoursesService {
       }
     } catch (e) {
       throw Exception('Error: $e');
+    }
+  }
+
+  static Future<dynamic> createCourse(dynamic data) async {
+    try {
+      final response = await http.post(Uri.parse(AppConstants.coursesEndpoint),
+          headers: AppConstants.defaultHeaders, body: jsonEncode(data));
+      if (response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return data;
+      } else {
+        throw Exception('Failed to enroll, status: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

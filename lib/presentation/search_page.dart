@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:skill_sharing_platform/services/categories_service.dart';
 import './course_detail.dart';
-// Import your course service here
 import 'package:skill_sharing_platform/services/course_service.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -16,11 +15,9 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   List<Map<String, dynamic>> _searchResults = [];
   String _searchQuery = '';
-  String? _selectedCategory; // Track selected category
+  String? _selectedCategory;
   bool _isLoading = false;
   bool _hasSearched = false;
-
-  // Debounce timer to avoid too many API calls
   Timer? _debounceTimer;
 
   @override
@@ -33,14 +30,10 @@ class _SearchScreenState extends State<SearchScreen> {
     _debounceTimer?.cancel();
     super.dispose();
   }
-
-  // Search Function with backend API call
   void _onSearchChanged(String query) {
     setState(() {
       _searchQuery = query;
     });
-
-    // Cancel previous timer
     _debounceTimer?.cancel();
 
     if (query.isEmpty && _selectedCategory == null) {
@@ -50,14 +43,11 @@ class _SearchScreenState extends State<SearchScreen> {
       });
       return;
     }
-
-    // Set up debounce timer to delay API call
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
       _searchCourses();
     });
   }
 
-  // Search courses using backend API
   Future<void> _searchCourses() async {
     setState(() {
       _isLoading = true;
@@ -65,19 +55,16 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     try {
-      // Prepare filters map
+
       final filters = <String, dynamic>{};
       if (_selectedCategory != null) {
         filters['categoryId'] = _selectedCategory;
       }
 
-      // Call backend API with search query and filters
       final results = await CoursesService.getCourses(
         search: _searchQuery,
         filters: filters,
       );
-
-      // Convert API response to the format expected by your UI
       final formattedResults = results.map((course) {
         return {
           'id': course['id'],
@@ -117,16 +104,14 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  // Handle category selection
   void _onCategorySelected(String category) {
     setState(() {
       _selectedCategory = _selectedCategory == category ? null : category;
       _hasSearched = true;
     });
-    _searchCourses(); // Trigger search with new category filter
+    _searchCourses();
   }
 
-  // Clear all filters
   void _clearFilters() {
     setState(() {
       _selectedCategory = null;
@@ -170,8 +155,6 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
     );
   }
-
-  // Build filter chips for active filters
   Widget _buildFilterChips() {
     return Wrap(
       spacing: 8.0,
@@ -206,8 +189,6 @@ class _SearchScreenState extends State<SearchScreen> {
       ],
     );
   }
-
-  // Build Search Results
   Widget _buildSearchResults() {
     if (_isLoading) {
       return const Center(
@@ -249,16 +230,14 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  // Product Card Widget
   Widget _buildProductCard(Map<String, dynamic> product) {
     return GestureDetector(
       onTap: () {
-        // Navigate to the Course Detail page with actual course ID
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => CourseDetailPage(
-              courseId: product['id'], // Use actual course ID
+              courseId: product['id'],
             ),
           ),
         );
