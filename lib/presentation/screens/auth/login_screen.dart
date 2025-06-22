@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skill_sharing_platform/auth_provider.dart';
 import 'package:skill_sharing_platform/services/auth_service.dart';
 import 'package:skill_sharing_platform/presentation/screens/auth/signup_screen.dart';
 import 'package:skill_sharing_platform/widgets/custom_textfield.dart';
@@ -33,32 +35,29 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    // Dismiss keyboard before login attempt
-    FocusScope.of(context).unfocus();
-
-    setState(() => _isLoading = true);
-
     try {
       final loginResponse = await AuthService.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      if (loginResponse["statusCode"] == 200) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const Core()),
-        );
-      }
 
-      // Store token securely
-      const storage = FlutterSecureStorage();
-      await storage.write(
-        key: 'auth_token',
-        value: loginResponse['token'],
+      if (loginResponse["statusCode"] == 200) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+        // Make sure you're passing the correct user data structure
+        await authProvider.login(
+          loginResponse['data']['token'],
+          loginResponse['data']['user'], // Verify this path is correct
+        );
+
+        Navigator.pushReplacementNamed(context, '/core');
+      }
+    } catch (e) {
+      print("Login error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_getErrorMessage(e))),
       );
-    // ignore: empty_catches
-    } catch (e) {}
+    }
   }
 
   Future<void> _storeUserData(Map<String, dynamic> userData) async {

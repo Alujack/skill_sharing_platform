@@ -31,10 +31,10 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     setState(() => _isLoading = true);
+    print("1. i am here ");
 
     try {
       final response = await AuthService.register(
-        _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
@@ -90,17 +90,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 'Fill in your details to get started',
                 style: TextStyle(fontSize: 16, color: Colors.grey),
                 textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              CustomTextField(
-                controller: _nameController,
-                labelText: 'Full Name',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
               ),
               const SizedBox(height: 20),
               CustomTextField(

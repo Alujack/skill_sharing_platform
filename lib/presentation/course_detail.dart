@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:skill_sharing_platform/auth_provider.dart';
+import 'package:skill_sharing_platform/presentation/initial.dart';
+import 'package:skill_sharing_platform/presentation/my_course_learning.dart';
+import 'package:skill_sharing_platform/services/enrollment_service.dart';
 import 'package:skill_sharing_platform/widgets/video_player.dart';
 import 'package:video_player/video_player.dart';
 import 'package:skill_sharing_platform/services/course_service.dart';
@@ -26,7 +31,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     _controller =
         VideoPlayerController.asset('assets/videos/NextJsOverview.mp4')
           ..initialize().then((_) {
-            setState(() {}); 
+            setState(() {});
           });
     _controller.setLooping(true); // Loop the video
   }
@@ -190,7 +195,41 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
               // Action buttons
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () async {
+                  try {
+                    final authProvider =
+                        Provider.of<AuthProvider>(context, listen: false);
+                    final userId = authProvider.user?.id;
+                    if (userId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please login first')),
+                      );
+                      return;
+                    }
+
+                    print(
+                        'Enrolling user $userId into course ${widget.courseId}');
+
+                    await EnrollmentService.buyNowEnroll(
+                        widget.courseId.toString(), userId);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Enrollment successful!')),
+                    );
+
+                    // Navigate after a short delay
+                    Future.delayed(const Duration(milliseconds: 1500), () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) => MyCourseLearning(courseId: 3,)),
+                      );
+                    });
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Enrollment failed: $e')),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 35, 0, 210),
                   minimumSize: const Size(double.infinity, 50),

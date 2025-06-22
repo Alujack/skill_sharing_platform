@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:skill_sharing_platform/auth_provider.dart';
 
 class AccountPage extends StatelessWidget {
   const AccountPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.user;
+    print("Current user in AccountPage: ${user?.toJson()}"); // Debug
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -26,12 +32,14 @@ class AccountPage extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 70,
-              backgroundImage: AssetImage('assets/images/profile.jpg'),
+              backgroundImage: user?.profileImage != null
+                  ? NetworkImage(user!.profileImage!)
+                  : AssetImage('assets/images/profile.jpg') as ImageProvider,
             ),
             SizedBox(height: 16),
             // User Name
             Text(
-              'Yoeurn Yan',
+              user?.name ?? 'Guest',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -40,25 +48,26 @@ class AccountPage extends StatelessWidget {
             SizedBox(height: 4),
             // User Email
             Text(
-              'yeantouch12345@gmail.com',
+              user?.email ?? '',
               style: TextStyle(
                 color: const Color.fromARGB(255, 102, 102, 102),
               ),
             ),
             SizedBox(height: 8),
             // Instructor View Switch
-            GestureDetector(
-              onTap: () {
-                // Handle switch view action
-              },
-              child: Text(
-                'Switch to instructor view',
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 25, 1, 233),
-                  fontWeight: FontWeight.bold,
+            if (authProvider.isAuthenticated)
+              GestureDetector(
+                onTap: () {
+                  // Handle switch view action
+                },
+                child: Text(
+                  'Switch to instructor view',
+                  style: TextStyle(
+                    color: const Color.fromARGB(255, 25, 1, 233),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
             SizedBox(height: 16),
             // Options List
             Expanded(
@@ -76,32 +85,30 @@ class AccountPage extends StatelessWidget {
               ),
             ),
             // Sign Out Button
-            TextButton(
-              onPressed: () {
-                // Handle sign out action
-              },
-              child: Text(
-                'Sign out',
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 25, 1, 233),
-                  fontWeight: FontWeight.bold,
+            if (authProvider.isAuthenticated)
+              TextButton(
+                onPressed: () {
+                  authProvider.logout();
+                  // Optionally navigate to login screen
+                },
+                child: Text(
+                  'Sign out',
+                  style: TextStyle(
+                    color: const Color.fromARGB(255, 25, 1, 233),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  // Option Item Builder
   Widget _buildOptionItem(String title) {
     return ListTile(
       title: Text(title, style: TextStyle(fontSize: 16)),
-      trailing: Icon(
-        Icons.arrow_forward_ios,
-        size: 16.0,
-      ),
+      trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
       onTap: () {
         // Handle option tap
       },

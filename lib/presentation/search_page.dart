@@ -15,8 +15,6 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   List<Map<String, dynamic>> _searchResults = [];
-  List<Map<String, dynamic>> _allCourses =
-      []; // Store all courses for filtering
   String _searchQuery = '';
   String? _selectedCategory; // Track selected category
   bool _isLoading = false;
@@ -28,7 +26,6 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchAllCourses(); // Load all courses when screen initializes
   }
 
   @override
@@ -37,14 +34,48 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  // Fetch all courses for filtering
-  Future<void> _fetchAllCourses() async {
+  // Search Function with backend API call
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+
+    // Cancel previous timer
+    _debounceTimer?.cancel();
+
+    if (query.isEmpty && _selectedCategory == null) {
+      setState(() {
+        _searchResults = [];
+        _hasSearched = false;
+      });
+      return;
+    }
+
+    // Set up debounce timer to delay API call
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      _searchCourses();
+    });
+  }
+
+  // Search courses using backend API
+  Future<void> _searchCourses() async {
     setState(() {
       _isLoading = true;
+      _hasSearched = true;
     });
 
     try {
-      final results = await CoursesService.getAllCourses();
+      // Prepare filters map
+      final filters = <String, dynamic>{};
+      if (_selectedCategory != null) {
+        filters['categoryId'] = _selectedCategory;
+      }
+
+      // Call backend API with search query and filters
+      final results = await CoursesService.getCourses(
+        search: _searchQuery,
+        filters: filters,
+      );
 
       // Convert API response to the format expected by your UI
       final formattedResults = results.map((course) {
@@ -67,7 +98,7 @@ class _SearchScreenState extends State<SearchScreen> {
       }).toList();
 
       setState(() {
-        _allCourses = List<Map<String, dynamic>>.from(formattedResults);
+        _searchResults = List<Map<String, dynamic>>.from(formattedResults);
         _isLoading = false;
       });
     } catch (e) {
@@ -78,78 +109,12 @@ class _SearchScreenState extends State<SearchScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading courses: ${e.toString()}'),
+            content: Text('Error searching courses: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
       }
     }
-  }
-
-  // Search Function with API call or local filtering
-  void _onSearchChanged(String query) {
-    setState(() {
-      _searchQuery = query;
-    });
-
-    // Cancel previous timer
-    _debounceTimer?.cancel();
-
-    if (query.isEmpty && _selectedCategory == null) {
-      setState(() {
-        _searchResults = [];
-        _hasSearched = false;
-      });
-      return;
-    }
-
-    // Set up debounce timer to delay filtering
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      _filterCourses();
-    });
-  }
-
-  // Filter courses based on search query and selected category
-  void _filterCourses() {
-    setState(() {
-      _isLoading = true;
-      _hasSearched = true;
-    });
-
-    List<Map<String, dynamic>> filteredCourses = List.from(_allCourses);
-
-    // Apply category filter if selected
-    if (_selectedCategory != null) {
-      filteredCourses = filteredCourses
-          .where((course) =>
-              course['category'].toLowerCase() ==
-              _selectedCategory!.toLowerCase())
-          .toList();
-    }
-
-    // Apply search query filter if not empty
-    if (_searchQuery.isNotEmpty) {
-      filteredCourses = filteredCourses
-          .where((course) =>
-              course['title']
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()) ||
-              course['description']
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()) ||
-              course['category']
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()) ||
-              course['author']
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()))
-          .toList();
-    }
-
-    setState(() {
-      _searchResults = filteredCourses;
-      _isLoading = false;
-    });
   }
 
   // Handle category selection
@@ -158,7 +123,7 @@ class _SearchScreenState extends State<SearchScreen> {
       _selectedCategory = _selectedCategory == category ? null : category;
       _hasSearched = true;
     });
-    _filterCourses();
+    _searchCourses(); // Trigger search with new category filter
   }
 
   // Clear all filters
@@ -169,7 +134,6 @@ class _SearchScreenState extends State<SearchScreen> {
       _searchResults = [];
       _hasSearched = false;
     });
-    // Clear the search field if you have a reference to it
   }
 
   @override
@@ -452,7 +416,7 @@ class CategoriesList extends StatefulWidget {
 }
 
 class _CategoriesListState extends State<CategoriesList> {
-  List<String> categories = [];
+  List<dynamic> categories = [];
   bool isLoading = true;
 
   @override
@@ -465,7 +429,7 @@ class _CategoriesListState extends State<CategoriesList> {
     try {
       final data = await CategoriesService.getAllCategories();
       setState(() {
-        categories = List<String>.from(data);
+        categories = List<Map<String, dynamic>>.from(data);
         isLoading = false;
       });
     } catch (e) {
@@ -494,11 +458,13 @@ class _CategoriesListState extends State<CategoriesList> {
           spacing: 8.0,
           runSpacing: 8.0,
           children: categories.map((category) {
-            final isSelected = widget.selectedCategory == category;
+            final isSelected =
+                widget.selectedCategory == category['id'].toString();
             return CategoryChip(
-              label: category,
+              label: category['name'],
               isSelected: isSelected,
-              onSelected: () => widget.onCategorySelected(category),
+              onSelected: () =>
+                  widget.onCategorySelected(category['id'].toString()),
             );
           }).toList(),
         ),
