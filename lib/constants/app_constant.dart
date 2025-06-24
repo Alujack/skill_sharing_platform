@@ -2,7 +2,7 @@
 
 class AppConstants {
   // API Configuration
-  static const String baseUrl = 'http://192.168.1.222:4000';
+  static const String baseUrl = 'http://192.168.1.37:4000';
   static const String apiVersion = 'v1';
   static const String apiPrefix = '$baseUrl/$apiVersion';
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_sharing_platform/auth_provider.dart';
+import 'package:skill_sharing_platform/widgets/become_instructor.dart';
 
 class AccountPage extends StatelessWidget {
   const AccountPage({super.key});
@@ -54,21 +55,24 @@ class AccountPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8),
-            // Instructor View Switch
-            if (authProvider.isAuthenticated)
+            if (authProvider.isAuthenticated && user!.role != 'Instructor')
               GestureDetector(
-                onTap: () {
-                  // Handle switch view action
+                onTap: () async {
+                  final result = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => BecomeInstructorDialog(
+                      userId: user!.id,
+                    ),
+                  );
                 },
                 child: Text(
-                  'Switch to instructor view',
+                  'Become an instructor',
                   style: TextStyle(
                     color: const Color.fromARGB(255, 25, 1, 233),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            SizedBox(height: 16),
             // Options List
             Expanded(
               child: ListView(

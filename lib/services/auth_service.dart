@@ -13,7 +13,8 @@ class AuthService {
   static const _tokenKey = 'auth_token';
   static const _userKey = 'user_data';
 
-  static Future<dynamic> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(
+      String email, String password) async {
     try {
       final response = await http.post(
         Uri.parse(AppConstants.loginEndpoint),
@@ -88,6 +89,7 @@ class AuthService {
       throw ApiException('Logout error: ${e.toString()}', 0);
     }
   }
+
   static Future<UserModel> getCurrentUser() async {
     try {
       final token = await getToken();
@@ -117,6 +119,7 @@ class AuthService {
   static Future<String?> getToken() async {
     return await _storage.read(key: _tokenKey);
   }
+
   static Future<UserModel?> getStoredUser() async {
     final userString = await _storage.read(key: _userKey);
     if (userString != null) {
@@ -135,19 +138,7 @@ class AuthService {
       return false;
     }
   }
-  static Future<void> initializeAuth(BuildContext context) async {
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final token = await getToken();
-      final user = await getStoredUser();
 
-      if (token != null && user != null) {
-        authProvider.login(token, user);
-      }
-    } catch (e) {
-      await clearAuthData();
-    }
-  }
   static Future<void> clearAuthData() async {
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _userKey);

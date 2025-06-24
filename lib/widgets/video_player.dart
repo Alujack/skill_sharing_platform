@@ -54,7 +54,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 class _ControlsOverlay extends StatelessWidget {
   final VideoPlayerController controller;
 
-  const _ControlsOverlay({super.key, required this.controller});
+  const _ControlsOverlay({required this.controller});
 
   @override
   Widget build(BuildContext context) {

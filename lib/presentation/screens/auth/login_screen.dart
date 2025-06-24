@@ -7,9 +7,10 @@ import 'package:skill_sharing_platform/widgets/custom_textfield.dart';
 import 'package:skill_sharing_platform/auth_wrapper.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _LoginScreenState createState() => _LoginScreenState();
 }
 
@@ -17,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool _passwordVisible = false;
   final FocusNode _passwordFocusNode = FocusNode();
   @override
@@ -32,21 +33,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     try {
-      final loginResponse = await AuthService.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.login(_emailController.text, _passwordController.text);
 
-      // Notify AuthProvider to update its state (usually sets user + isAuthenticated)
-      await Provider.of<AuthProvider>(context, listen: false).initialize();
-
-      // Navigate to AuthWrapper
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const AuthWrapper()),
-        (route) => false, // Remove all previous routes
+        (route) => false,
       );
     } catch (e) {
-      print("Login error: $e");
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_getErrorMessage(e))),
       );
@@ -68,19 +64,18 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _passwordFocusNode.dispose(); // Dispose focus node
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          FocusScope.of(context).unfocus(), // Dismiss keyboard on tap outside
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Login'),
-          automaticallyImplyLeading: false, // Remove back button
+          automaticallyImplyLeading: false,
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),

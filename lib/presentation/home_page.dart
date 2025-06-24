@@ -152,7 +152,6 @@ class _CourseRecommendationState extends State<CourseRecommendation> {
       setState(() {
         isLoading = false;
       });
-      print('Error loading courses: $e');
     }
   }
 
@@ -233,7 +232,6 @@ class CourseCard extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      // Navigate to the detail page when the title is tapped
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -314,7 +312,6 @@ class _CategoriesSectionState extends State<CategoriesSection> {
       setState(() {
         isLoading = false;
       });
-      print('Error loading categories: $e');
     }
   }
 
@@ -333,9 +330,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               TextButton(
-                onPressed: () {
-                  // Handle "see all" action
-                },
+                onPressed: () {},
                 child: const Text(
                   'see all',
                   style: TextStyle(color: Colors.blue),
@@ -353,11 +348,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                       return Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: OutlinedButton(
-                          onPressed: () {
-                            // Handle category click
-                            print(
-                                'Selected: ${category['name']} (ID: ${category['id']})');
-                          },
+                          onPressed: () {},
                           style: OutlinedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),

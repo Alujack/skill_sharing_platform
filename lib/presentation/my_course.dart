@@ -36,10 +36,8 @@ class _CourseScreenState extends State<CourseScreen> {
         });
         return;
       }
-      print("user == ${userId}");
 
       final courses = await StudentService.getStudentEnrollments(userId);
-      print("course == ${courses}");
       setState(() {
         _courses = courses;
         _isLoading = false;
@@ -54,8 +52,6 @@ class _CourseScreenState extends State<CourseScreen> {
 
   List<dynamic> get _filteredCourses {
     List<dynamic> filtered = _courses;
-
-    // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered
           .where((course) =>
@@ -68,7 +64,7 @@ class _CourseScreenState extends State<CourseScreen> {
           .toList();
     }
 
-    // Apply category filter (placeholder - you can implement actual filters)
+  
     if (_activeFilter == 'Favourite') {
       // Implement favourite filter logic
     } else if (_activeFilter == 'Downloads') {
@@ -201,14 +197,15 @@ class FilterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: onPressed,
-      child: Text(label),
       style: OutlinedButton.styleFrom(
         shape: const StadiumBorder(),
         side: BorderSide(
           color: isActive ? Colors.blue : Colors.grey,
         ),
+        // ignore: deprecated_member_use
         backgroundColor: isActive ? Colors.blue.withOpacity(0.1) : null,
       ),
+      child: Text(label),
     );
   }
 }
@@ -229,7 +226,7 @@ class CourseItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: ListTile(
         leading: Image.asset(
-          'assets/images/course.png', // Placeholder image
+          'assets/images/course.png', 
           width: 50,
           height: 50,
           fit: BoxFit.cover,

@@ -4,9 +4,10 @@ import 'package:skill_sharing_platform/presentation/screens/auth/login_screen.da
 import 'package:skill_sharing_platform/widgets/custom_textfield.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({Key? key}) : super(key: key);
+  const SignupScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _SignupScreenState createState() => _SignupScreenState();
 }
 
@@ -31,25 +32,20 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     setState(() => _isLoading = true);
-    print("1. i am here ");
-
     try {
-      final response = await AuthService.register(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
+      // Add the API call here
+      await AuthService.register(
+        _emailController.text,
+        _passwordController.text,
       );
 
-      // Handle successful registration
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration successful! Please login.')),
       );
-      
-      // Navigate back to login
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
-      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
@@ -100,7 +96,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
                   }
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                      .hasMatch(value)) {
                     return 'Please enter a valid email';
                   }
                   return null;
@@ -143,11 +140,14 @@ class _SignupScreenState extends State<SignupScreen> {
                 },
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _confirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    _confirmPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                     color: Colors.grey,
                   ),
                   onPressed: () {
-                    setState(() => _confirmPasswordVisible = !_confirmPasswordVisible);
+                    setState(() =>
+                        _confirmPasswordVisible = !_confirmPasswordVisible);
                   },
                 ),
               ),
