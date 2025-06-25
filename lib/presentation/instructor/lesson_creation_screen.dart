@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:skill_sharing_platform/services/lesson_service.dart';
+import 'package:skill_sharing_platform/widgets/video_picker.dart';
 
 class LessonCreationScreen extends StatefulWidget {
   final int courseId;
   final String courseTitle;
 
-  const LessonCreationScreen({super.key, 
+  const LessonCreationScreen({
+    super.key,
     required this.courseId,
     required this.courseTitle,
   });
@@ -79,15 +81,12 @@ class _LessonCreationScreenState extends State<LessonCreationScreen> {
                         onSaved: (v) => _title = v!,
                       ),
                       SizedBox(height: 16),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'Video URL*',
-                          hintText: 'https://example.com/video.mp4',
-                        ),
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                        onSaved: (v) => _videoUrl = v!,
+                      VideoPickerWidget(
+                        onVideoSelected: (String url) {
+                          _videoUrl = url;
+                        },
                       ),
-                      SizedBox(height: 24),
+                      SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(

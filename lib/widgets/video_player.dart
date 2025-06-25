@@ -1,10 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
+  final bool autoPlay;
 
-  const VideoPlayerWidget({super.key, required this.videoUrl});
+  const VideoPlayerWidget({
+    super.key,
+    required this.videoUrl,
+    this.autoPlay = false,
+  });
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -12,17 +18,32 @@ class VideoPlayerWidget extends StatefulWidget {
 
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
+  bool _initialized = false;
+  bool _isFullScreen = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize the video player controller with the given URL
-    _controller =
-        VideoPlayerController.asset("assets/videos/NextJsOverview.mp4")
-          ..initialize().then((_) {
-            setState(() {}); 
-          });
-    _controller.setLooping(true); 
+    _initializePlayer();
+  }
+
+  Future<void> _initializePlayer() async {
+    final url = widget.videoUrl;
+
+    try {
+      _controller = url.startsWith('http')
+          ? VideoPlayerController.network(url)
+          : VideoPlayerController.file(File(url));
+
+      await _controller.initialize();
+      _controller.setLooping(true);
+      if (widget.autoPlay) {
+        _controller.play();
+      }
+      setState(() => _initialized = true);
+    } catch (e) {
+      debugPrint('❌ Failed to load video: $e');
+    }
   }
 
   @override
@@ -31,57 +52,332 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     super.dispose();
   }
 
+  void _toggleFullScreen() {
+    if (_isFullScreen) {
+      Navigator.of(context).pop();
+      setState(() => _isFullScreen = false);
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => FullScreenVideoPlayer(
+            controller: _controller,
+            onExitFullScreen: () =>        (() => _isFullScreen = false),
+          ),
+          fullscreenDialog: true,
+        ),
+      ).then((_) => setState(() => _isFullScreen = false));
+      setState(() => _isFullScreen = true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return _controller.value.isInitialized
-        ? AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                VideoPlayer(_controller),
-                _ControlsOverlay(controller: _controller),
-                VideoProgressIndicator(_controller, allowScrubbing: true),
-              ],
+    if (!_initialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return GestureDetector(
+      onDoubleTap: _toggleFullScreen,
+      child: AspectRatio(
+        aspectRatio: _controller.value.aspectRatio,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            VideoPlayer(_controller),
+            VideoControlsOverlay(
+              controller: _controller,
+              onFullScreenTap: _toggleFullScreen,
+              isFullScreen: _isFullScreen,
             ),
-          )
-        : const Center(
-            child:
-                CircularProgressIndicator());
+            VideoProgressIndicator(
+              _controller,
+              allowScrubbing: true,
+              colors: const VideoProgressColors(
+                playedColor: Colors.red,
+                bufferedColor: Colors.grey,
+                backgroundColor: Colors.white24,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
-class _ControlsOverlay extends StatelessWidget {
+class VideoControlsOverlay extends StatefulWidget {
   final VideoPlayerController controller;
+  final VoidCallback onFullScreenTap;
+  final bool isFullScreen;
 
-  const _ControlsOverlay({required this.controller});
+  const VideoControlsOverlay({
+    super.key,
+    required this.controller,
+    required this.onFullScreenTap,
+    required this.isFullScreen,
+  });
+
+  @override
+  State<VideoControlsOverlay> createState() => _VideoControlsOverlayState();
+}
+
+class _VideoControlsOverlayState extends State<VideoControlsOverlay> {
+  bool _showControls = false;
+  bool _isPlaying = false;
+  bool _isMuted = false;
+  double _volume = 1.0;
+  Duration _position = Duration.zero;
+  Duration _duration = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _isPlaying = widget.controller.value.isPlaying;
+    _isMuted = widget.controller.value.volume == 0;
+    _volume = widget.controller.value.volume;
+    _position = widget.controller.value.position;
+    _duration = widget.controller.value.duration;
+
+    widget.controller.addListener(_updateState);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_updateState);
+    super.dispose();
+  }
+
+  void _updateState() {
+    if (mounted) {
+      setState(() {
+        _isPlaying = widget.controller.value.isPlaying;
+        _isMuted = widget.controller.value.volume == 0;
+        _volume = widget.controller.value.volume;
+        _position = widget.controller.value.position;
+        _duration = widget.controller.value.duration;
+      });
+    }
+  }
+
+  void _togglePlayPause() {
+    setState(() {
+      if (widget.controller.value.isPlaying) {
+        widget.controller.pause();
+      } else {
+        widget.controller.play();
+      }
+      _isPlaying = !_isPlaying;
+    });
+  }
+
+  void _toggleMute() {
+    setState(() {
+      if (widget.controller.value.volume == 0) {
+        widget.controller.setVolume(_volume > 0 ? _volume : 1.0);
+        _isMuted = false;
+      } else {
+        _volume = widget.controller.value.volume;
+        widget.controller.setVolume(0);
+        _isMuted = true;
+      }
+    });
+  }
+
+  void _seekForward() {
+    final newPosition =
+        widget.controller.value.position + const Duration(seconds: 10);
+    widget.controller.seekTo(newPosition < _duration ? newPosition : _duration);
+  }
+
+  void _seekBackward() {
+    final newPosition =
+        widget.controller.value.position - const Duration(seconds: 10);
+    widget.controller
+        .seekTo(newPosition > Duration.zero ? newPosition : Duration.zero);
+  }
+
+  void _toggleControls() {
+    setState(() {
+      _showControls = !_showControls;
+    });
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return [
+      if (duration.inHours > 0) hours,
+      minutes,
+      seconds,
+    ].join(':');
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        controller.value.isPlaying ? controller.pause() : controller.play();
-      },
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: Icon(
-              controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.white,
-              size: 50,
+      onTap: _toggleControls,
+      child: AnimatedOpacity(
+        opacity:
+            _showControls || !widget.controller.value.isPlaying ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 300),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.7),
+                Colors.transparent,
+                Colors.transparent,
+                Colors.black.withOpacity(0.7),
+              ],
             ),
           ),
-          Positioned(
-            top: 10,
-            right: 10,
-            child: IconButton(
-              icon: const Icon(Icons.fullscreen, color: Colors.white),
-              onPressed: () {
-              },
-            ),
+          child: Stack(
+            children: [
+              if (widget.isFullScreen)
+                Positioned(
+                  top: 40,
+                  left: 20,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: widget.onFullScreenTap,
+                  ),
+                ),
+              Positioned(
+                top: widget.isFullScreen ? 40 : 10,
+                right: 10,
+                child: IconButton(
+                  icon: Icon(
+                    widget.isFullScreen
+                        ? Icons.fullscreen_exit
+                        : Icons.fullscreen,
+                    color: Colors.white,
+                  ),
+                  onPressed: widget.onFullScreenTap,
+                ),
+              ),
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.replay_10,
+                          color: Colors.white, size: 30),
+                      onPressed: _seekBackward,
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _isPlaying ? Icons.pause : Icons.play_arrow,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                      onPressed: _togglePlayPause,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.forward_10,
+                          color: Colors.white, size: 30),
+                      onPressed: _seekForward,
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                bottom: 50,
+                left: 10,
+                child: IconButton(
+                  icon: Icon(
+                    _isMuted ? Icons.volume_off : Icons.volume_up,
+                    color: Colors.white,
+                  ),
+                  onPressed: _toggleMute,
+                ),
+              ),
+              Positioned(
+                bottom: 50,
+                right: 10,
+                child: Text(
+                  '${_formatDuration(_position)} / ${_formatDuration(_duration)}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class FullScreenVideoPlayer extends StatefulWidget {
+  final VideoPlayerController controller;
+  final VoidCallback onExitFullScreen;
+
+  const FullScreenVideoPlayer({
+    super.key,
+    required this.controller,
+    required this.onExitFullScreen,
+  });
+
+  @override
+  State<FullScreenVideoPlayer> createState() => _FullScreenVideoPlayerState();
+}
+
+class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
+  bool _showControls = true;
+  late Orientation _orientation;
+
+  @override
+  void initState() {
+    super.initState();
+    _orientation = MediaQuery.of(context).orientation;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: WillPopScope(
+        onWillPop: () async {
+          widget.onExitFullScreen();
+          return true;
+        },
+        child: OrientationBuilder(
+          builder: (context, orientation) {
+            _orientation = orientation;
+            return Stack(
+              children: [
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: widget.controller.value.aspectRatio,
+                    child: VideoPlayer(widget.controller),
+                  ),
+                ),
+                VideoControlsOverlay(
+                  controller: widget.controller,
+                  onFullScreenTap: widget.onExitFullScreen,
+                  isFullScreen: true,
+                ),
+                if (_orientation == Orientation.landscape)
+                  Positioned(
+                    right: 20,
+                    top: 20,
+                    child: IconButton(
+                      icon: const Icon(Icons.close,
+                          color: Colors.white, size: 30),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        widget.onExitFullScreen();
+                      },
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

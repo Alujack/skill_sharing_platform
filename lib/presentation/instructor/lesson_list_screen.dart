@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skill_sharing_platform/presentation/instructor/lesson_creation_screen.dart';
+import 'package:skill_sharing_platform/presentation/instructor/lesson_detail_screen.dart';
 import 'package:skill_sharing_platform/services/lesson_service.dart';
 
 class LessonListScreen extends StatefulWidget {
@@ -127,13 +128,17 @@ class _LessonListScreenState extends State<LessonListScreen> {
           child: ListTile(
             leading: const Icon(Icons.video_library),
             title: Text(lesson['title'] ?? 'Untitled Lesson'),
-            subtitle: Text(lesson['videoUrl'] ?? 'No URL provided'),
             trailing: IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () => _showDeleteDialog(lesson['id']),
             ),
             onTap: () {
-              // Add navigation to lesson detail/edit screen if needed
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LessonDetailScreen(lesson: lesson),
+                ),
+              );
             },
           ),
         );
