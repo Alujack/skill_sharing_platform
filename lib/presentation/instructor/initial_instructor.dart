@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:skill_sharing_platform/presentation/home_page.dart';
-import 'package:skill_sharing_platform/presentation/my_course.dart';
 import 'package:skill_sharing_platform/presentation//account_profile.dart';
+import 'package:skill_sharing_platform/presentation/instructor/course_list_screen.dart';
+import 'package:skill_sharing_platform/presentation/instructor/my_course.dart';
 import 'package:skill_sharing_platform/widgets/inctructor_button_bar.dart';
 
 // Home Screen with Bottom Navigation Bar
@@ -36,7 +37,7 @@ class _HomeScreenState extends State<InstructorCore> {
       case 0:
         return const FeaturedPage();
       case 1:
-        return const CourseScreen();
+        return CourseListScreen();
       case 2:
         return const AccountPage();
       default:

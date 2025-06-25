@@ -85,7 +85,7 @@ class CoursesService {
     }
   }
 
-  static Future<List<dynamic>> getInstructorCourses(int instructorId) async {
+  static Future<List<dynamic>> getInstructorCourses(String instructorId) async {
     try {
       final response = await http.get(
         Uri.parse('${AppConstants.coursesEndpoint}/instructor/$instructorId'),

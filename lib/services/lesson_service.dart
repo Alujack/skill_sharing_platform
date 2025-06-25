@@ -27,9 +27,10 @@ class LessonService {
         Uri.parse("${AppConstants.lessonEndpoint}/course/$courseId"),
         headers: AppConstants.defaultHeaders,
       );
+      print("hello ${response.body}");
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data;
+        return data['data'];
       } else {
         return [];
       }
@@ -73,7 +74,8 @@ class LessonService {
     }
   }
 
-  static Future<dynamic> updateLesson(String lessonId, dynamic lessonData) async {
+  static Future<dynamic> updateLesson(
+      String lessonId, dynamic lessonData) async {
     try {
       final response = await http.put(
         Uri.parse("${AppConstants.lessonEndpoint}/$lessonId"),

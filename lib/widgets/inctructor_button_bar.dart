@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class InstructorCustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onItemSelected;
@@ -25,9 +24,7 @@ class InstructorCustomBottomNavBar extends StatelessWidget {
           label: 'Featured',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.video_collection),
-          label: 'My course',
-        ),
+            icon: Icon(Icons.video_camera_front), label: 'Create Course'),
         BottomNavigationBarItem(
           icon: Icon(Icons.account_circle),
           label: 'Account',
