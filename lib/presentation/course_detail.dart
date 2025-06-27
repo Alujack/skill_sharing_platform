@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_sharing_platform/auth_provider.dart';
 import 'package:skill_sharing_platform/presentation/favourite_page.dart';
+import 'package:skill_sharing_platform/presentation/initial.dart';
+import 'package:skill_sharing_platform/presentation/payment_screen.dart';
 import 'package:skill_sharing_platform/services/enrollment_service.dart';
 import 'package:skill_sharing_platform/widgets/video_player.dart';
 import 'package:video_player/video_player.dart';
@@ -196,41 +198,27 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
               // Action buttons
               ElevatedButton(
-                onPressed: () async {
-                  try {
-                    final authProvider =
-                        Provider.of<AuthProvider>(context, listen: false);
-                    final userId = authProvider.user?.id;
-                    if (userId == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please login first')),
-                      );
-                      return;
-                    }
-
-                    await EnrollmentService.buyNowEnroll(
-                        widget.courseId.toString(), userId);
-
-                    // ignore: use_build_context_synchronously
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Enrollment successful!')),
-                    );
-                  } catch (e) {
-                    // ignore: use_build_context_synchronously
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Enrollment failed: $e')),
-                    );
-                  }
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => PaymentScreen(
+                        courseId: widget.courseId.toString(),
+                        courseTitle: courseData!['title'] ?? 'Course Details',
+                        coursePrice: courseData!['price'] ?? 'Free',
+                      ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 35, 0, 210),
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: const Text(
-                  'Enroll for free',
+                  'Buy Now',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
+
               const SizedBox(height: 10),
               OutlinedButton(
                 onPressed: () async {
@@ -244,34 +232,42 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       );
                       return;
                     }
+
                     await FavouriteService.addtofavourite(
                         widget.courseId.toString(), userId);
 
+                    // Show success popup
+                    _showSuccessPopup(context);
+
+                    // Also show snackbar confirmation
                     // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Add to favourite')),
+                      const SnackBar(content: Text('Added to favorites!')),
                     );
 
-                    // Navigate after a short delay
-                    Future.delayed(const Duration(milliseconds: 1500), () {
-                      // ignore: use_build_context_synchronously
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                            builder: (context) => FavouritePage()),
-                      );
-                    });
+                    // Navigate after delay
+                    // Future.delayed(const Duration(milliseconds: 2000), () {
+                    //   if (mounted) {
+                    //     Navigator.of(context).pushReplacement(
+                    //       MaterialPageRoute(
+                    //           builder: (context) => FavouritePage()),
+                    //     );
+                    //   }
+                    // });
                   } catch (e) {
                     // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Add favourite failed: $e')),
+                      SnackBar(content: Text('Failed to add to favorites: $e')),
                     );
                   }
                 },
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
+                  side: BorderSide(
+                      color: Colors.grey.shade300), // Optional: add border
                 ),
                 child: const Text(
-                  'Add to favourite',
+                  'Add to favorites',
                   style: TextStyle(color: Colors.black),
                 ),
               ),
@@ -333,6 +329,68 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 const Text('No lessons available for this course'),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.favorite,
+              color: Colors.red,
+              size: 60,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Added to Favorites!',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'This course has been added to your favorites list.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const Core(initialIndex: 3),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'View Favorites',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Continue Browsing'),
+            ),
+          ],
         ),
       ),
     );

@@ -6,16 +6,22 @@ import 'my_course.dart';
 import './account_profile.dart';
 import './favourite_page.dart';
 
-// Home Screen with Bottom Navigation Bar
 class Core extends StatefulWidget {
-  const Core({super.key});
+  final int initialIndex;
+  const Core({super.key, this.initialIndex = 0});
 
   @override
   State<Core> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<Core> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +38,6 @@ class _HomeScreenState extends State<Core> {
     );
   }
 
-  // Function to return the current page widget
   Widget getCurrentPage(int index) {
     switch (index) {
       case 0:

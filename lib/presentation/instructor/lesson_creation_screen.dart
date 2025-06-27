@@ -27,22 +27,27 @@ class _LessonCreationScreenState extends State<LessonCreationScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
+    if (_videoUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select a video')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      await LessonService.createLesson({
-        "title": _title,
-        "videoUrl": _videoUrl,
-        "courseId": widget.courseId,
-      });
+      await LessonService.createLesson(
+        title: _title,
+        courseId: widget.courseId,
+        videoFilePath: _videoUrl,
+      );
 
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lesson added successfully!')),
       );
       _formKey.currentState!.reset();
     } catch (e) {
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );

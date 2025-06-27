@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:video_compress/video_compress.dart';
+import 'package:video_compress/video_compress.dart' as vc;
 
 class VideoPickerWidget extends StatefulWidget {
   final Function(String url) onVideoSelected;
@@ -19,6 +20,7 @@ class _VideoPickerWidgetState extends State<VideoPickerWidget> {
   bool _isConverting = false;
   String _conversionStatus = '';
   double _compressionProgress = 0.0;
+  late final Subscription _subscription;
 
   @override
   void initState() {
@@ -28,12 +30,20 @@ class _VideoPickerWidgetState extends State<VideoPickerWidget> {
 
   void _initVideoCompress() {
     VideoCompress.setLogLevel(0);
+    _subscription = VideoCompress.compressProgress$.subscribe((progress) {
+      if (mounted) {
+        setState(() {
+          _compressionProgress = progress / 100.0;
+        });
+      }
+    });
   }
 
   Future<void> _pickVideo(ImageSource source) async {
     final XFile? pickedFile = await _picker.pickVideo(source: source);
     if (pickedFile == null) return;
 
+    if (!mounted) return;
     setState(() {
       _isConverting = true;
       _conversionStatus = 'Processing video...';
@@ -44,16 +54,14 @@ class _VideoPickerWidgetState extends State<VideoPickerWidget> {
       final appDir = await getApplicationDocumentsDirectory();
       final originalFileName = p.basename(pickedFile.path);
       final fileNameWithoutExt = p.basenameWithoutExtension(originalFileName);
-
-      // Create output path with .mp4 extension
       final outputPath = '${appDir.path}/${fileNameWithoutExt}_converted.mp4';
 
-      // Check if the file is already mp4 with good compression
+      // If already .mp4 and small size, copy directly
       if (p.extension(pickedFile.path).toLowerCase() == '.mp4') {
         final fileSize = await File(pickedFile.path).length();
-        // If file is small enough (less than 50MB), just copy it
         if (fileSize < 50 * 1024 * 1024) {
           final savedVideo = await File(pickedFile.path).copy(outputPath);
+          if (!mounted) return;
           setState(() {
             _videoFile = savedVideo;
             _isConverting = false;
@@ -64,18 +72,11 @@ class _VideoPickerWidgetState extends State<VideoPickerWidget> {
         }
       }
 
+      if (!mounted) return;
       setState(() {
         _conversionStatus = 'Compressing and converting to MP4...';
       });
 
-      // Set up progress listener
-      VideoCompress.compressProgress$.subscribe((progress) {
-        setState(() {
-          _compressionProgress = progress / 100.0;
-        });
-      });
-
-      // Compress and convert video to mp4
       final MediaInfo? info = await VideoCompress.compressVideo(
         pickedFile.path,
         quality: VideoQuality.MediumQuality,
@@ -84,15 +85,14 @@ class _VideoPickerWidgetState extends State<VideoPickerWidget> {
       );
 
       if (info != null && info.path != null) {
-        // Copy the compressed video to our desired location
         final compressedFile = File(info.path!);
         final finalVideo = await compressedFile.copy(outputPath);
 
-        // Clean up the temporary compressed file
         if (await compressedFile.exists()) {
           await compressedFile.delete();
         }
 
+        if (!mounted) return;
         setState(() {
           _videoFile = finalVideo;
           _isConverting = false;
@@ -104,24 +104,28 @@ class _VideoPickerWidgetState extends State<VideoPickerWidget> {
         throw Exception('Video compression failed');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isConverting = false;
         _conversionStatus = 'Compression failed: ${e.toString()}';
         _compressionProgress = 0.0;
       });
 
-      // Fallback: just copy the original file
+      // Fallback: use original file
       try {
         final appDir = await getApplicationDocumentsDirectory();
         final fileName = p.basename(pickedFile.path);
         final savedVideo =
             await File(pickedFile.path).copy('${appDir.path}/$fileName');
+
+        if (!mounted) return;
         setState(() {
           _videoFile = savedVideo;
           _conversionStatus = 'Using original format';
         });
         widget.onVideoSelected(savedVideo.path);
       } catch (fallbackError) {
+        if (!mounted) return;
         setState(() {
           _conversionStatus = 'Error: ${fallbackError.toString()}';
         });
@@ -131,6 +135,7 @@ class _VideoPickerWidgetState extends State<VideoPickerWidget> {
 
   @override
   void dispose() {
+    _subscription.unsubscribe(); // ✅ Unsubscribe to prevent memory leak
     VideoCompress.cancelCompression();
     super.dispose();
   }

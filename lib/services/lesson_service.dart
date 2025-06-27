@@ -56,17 +56,41 @@ class LessonService {
     }
   }
 
-  static Future<dynamic> createLesson(dynamic lessonData) async {
+  static Future<dynamic> createLesson({
+    required String title,
+    required int courseId,
+    required String videoFilePath,
+  }) async {
     try {
-      final response = await http.post(
-        Uri.parse(AppConstants.lessonEndpoint),
-        headers: AppConstants.defaultHeaders,
-        body: jsonEncode(lessonData),
+      print("title ==${title}");
+      print("course ==${courseId}");
+      print("video  ==${videoFilePath}");
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("${AppConstants.lessonEndpoint}/upload"),
       );
+
+      // Add form fields
+      request.fields['title'] = title;
+      request.fields['courseId'] = courseId.toString();
+
+      // Add video file
+      request.files
+          .add(await http.MultipartFile.fromPath('video', videoFilePath));
+
+      // Add headers if needed
+      request.headers.addAll(AppConstants.defaultHeaders);
+
+      // Send request
+      var streamedResponse = await request.send();
+
+      // Read response
+      var response = await http.Response.fromStream(streamedResponse);
+
       if (response.statusCode == 201) {
-        final data = json.decode(response.body);
-        return data;
+        return json.decode(response.body);
       } else {
+        // You can decode error response here if needed
         return null;
       }
     } catch (e) {

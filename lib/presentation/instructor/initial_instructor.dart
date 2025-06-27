@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:skill_sharing_platform/presentation/home_page.dart';
 import 'package:skill_sharing_platform/presentation//account_profile.dart';
 import 'package:skill_sharing_platform/presentation/instructor/course_list_screen.dart';
-import 'package:skill_sharing_platform/presentation/instructor/my_course.dart';
 import 'package:skill_sharing_platform/widgets/inctructor_button_bar.dart';
 
 // Home Screen with Bottom Navigation Bar
@@ -17,7 +16,6 @@ class _HomeScreenState extends State<InstructorCore> {
 
   @override
   Widget build(BuildContext context) {
-    print("i am in instructor");
     return Scaffold(
       body: getCurrentPage(_currentIndex),
       bottomNavigationBar: InstructorCustomBottomNavBar(
@@ -30,8 +28,6 @@ class _HomeScreenState extends State<InstructorCore> {
       ),
     );
   }
-
-  // Function to return the current page widget
   Widget getCurrentPage(int index) {
     switch (index) {
       case 0:

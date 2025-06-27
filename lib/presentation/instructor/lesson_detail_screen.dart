@@ -10,6 +10,7 @@ class LessonDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = lesson['title'] ?? 'Lesson Detail';
     final videoUrl = lesson['videoUrl'];
+    print("video == ${videoUrl}");
 
     return Scaffold(
       appBar: AppBar(
@@ -32,7 +33,7 @@ class LessonDetailScreen extends StatelessWidget {
                   Text('Video Preview:',
                       style: TextStyle(fontWeight: FontWeight.w600)),
                   SizedBox(height: 12),
-                  VideoPlayerWidget(videoUrl: 'videoUrl'),
+                  VideoPlayerWidget(videoUrl: videoUrl),
                 ],
               )
             else

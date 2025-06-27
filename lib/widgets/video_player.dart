@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:skill_sharing_platform/constants/app_constant.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPlayerWidget extends StatefulWidget {
@@ -29,11 +31,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   Future<void> _initializePlayer() async {
     final url = widget.videoUrl;
+    print("this is video == ${AppConstants.baseUrl}$url");
 
     try {
       _controller = url.startsWith('http')
           ? VideoPlayerController.network(url)
-          : VideoPlayerController.file(File(url));
+          : VideoPlayerController.network("${AppConstants.baseUrl}$url");
 
       await _controller.initialize();
       _controller.setLooping(true);
@@ -42,7 +45,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       }
       setState(() => _initialized = true);
     } catch (e) {
-      debugPrint('❌ Failed to load video: $e');
+      debugPrint('$e');
     }
   }
 
@@ -62,7 +65,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         MaterialPageRoute(
           builder: (_) => FullScreenVideoPlayer(
             controller: _controller,
-            onExitFullScreen: () =>        (() => _isFullScreen = false),
+            onExitFullScreen: () => (() => _isFullScreen = false),
           ),
           fullscreenDialog: true,
         ),
@@ -328,55 +331,122 @@ class FullScreenVideoPlayer extends StatefulWidget {
 
 class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   bool _showControls = true;
-  late Orientation _orientation;
+  Timer? _hideControlsTimer;
 
   @override
   void initState() {
     super.initState();
-    _orientation = MediaQuery.of(context).orientation;
+    _startHideControlsTimer();
+  }
+
+  @override
+  void dispose() {
+    _hideControlsTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startHideControlsTimer() {
+    _hideControlsTimer?.cancel();
+    _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _showControls = false;
+        });
+      }
+    });
+  }
+
+  void _toggleControls() {
+    setState(() {
+      _showControls = !_showControls;
+    });
+    if (_showControls) {
+      _startHideControlsTimer();
+    }
+  }
+
+  void _exitFullScreen() {
+    // Make sure to call the callback and pop the navigator
+    widget.onExitFullScreen();
+    if (Navigator.canPop(context)) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: WillPopScope(
-        onWillPop: () async {
-          widget.onExitFullScreen();
-          return true;
+      body: PopScope(
+        canPop: true,
+        onPopInvoked: (didPop) {
+          if (didPop) {
+            widget.onExitFullScreen();
+          }
         },
-        child: OrientationBuilder(
-          builder: (context, orientation) {
-            _orientation = orientation;
-            return Stack(
-              children: [
-                Center(
-                  child: AspectRatio(
-                    aspectRatio: widget.controller.value.aspectRatio,
-                    child: VideoPlayer(widget.controller),
-                  ),
-                ),
-                VideoControlsOverlay(
-                  controller: widget.controller,
-                  onFullScreenTap: widget.onExitFullScreen,
-                  isFullScreen: true,
-                ),
-                if (_orientation == Orientation.landscape)
-                  Positioned(
-                    right: 20,
-                    top: 20,
-                    child: IconButton(
-                      icon: const Icon(Icons.close,
-                          color: Colors.white, size: 30),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        widget.onExitFullScreen();
-                      },
+        child: GestureDetector(
+          onTap: _toggleControls,
+          child: OrientationBuilder(
+            builder: (context, orientation) {
+              return Stack(
+                children: [
+                  // Video player
+                  Center(
+                    child: AspectRatio(
+                      aspectRatio: widget.controller.value.aspectRatio,
+                      child: VideoPlayer(widget.controller),
                     ),
                   ),
-              ],
-            );
-          },
+
+                  // Video controls overlay
+                  if (_showControls)
+                    VideoControlsOverlay(
+                      controller: widget.controller,
+                      onFullScreenTap: _exitFullScreen,
+                      isFullScreen: true,
+                    ),
+
+                  // Close button for landscape mode
+                  if (orientation == Orientation.landscape && _showControls)
+                    Positioned(
+                      right: 20,
+                      top: 20,
+                      child: SafeArea(
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                          onPressed: _exitFullScreen,
+                          splashRadius: 25,
+                          tooltip: 'Exit fullscreen',
+                        ),
+                      ),
+                    ),
+
+                  // Back button for portrait mode
+                  if (orientation == Orientation.portrait && _showControls)
+                    Positioned(
+                      left: 20,
+                      top: 20,
+                      child: SafeArea(
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                          onPressed: _exitFullScreen,
+                          splashRadius: 25,
+                          tooltip: 'Back',
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
