@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skill_sharing_platform/presentation/instructor/lesson_creation_screen.dart';
+import 'package:skill_sharing_platform/presentation/instructor/lesson_update_screen.dart';
 import 'package:skill_sharing_platform/presentation/instructor/lesson_detail_screen.dart';
 import 'package:skill_sharing_platform/services/lesson_service.dart';
 
@@ -128,9 +129,18 @@ class _LessonListScreenState extends State<LessonListScreen> {
           child: ListTile(
             leading: const Icon(Icons.video_library),
             title: Text(lesson['title'] ?? 'Untitled Lesson'),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () => _showDeleteDialog(lesson['id']),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _navigateToEditLesson(lesson),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => _showDeleteDialog(lesson['id']),
+                ),
+              ],
             ),
             onTap: () {
               Navigator.push(
@@ -170,7 +180,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
   }
 
   void _navigateToAddLesson() async {
-    await Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => LessonCreationScreen(
@@ -179,6 +189,24 @@ class _LessonListScreenState extends State<LessonListScreen> {
         ),
       ),
     );
-    _loadLessons(); // Refresh after returning
+    if (result == true) {
+      _loadLessons(); 
+    }
+  }
+
+  void _navigateToEditLesson(Map<String, dynamic> lesson) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdateLessonScreen(
+          lesson: lesson,
+          courseId: widget.courseId,
+          courseTitle: widget.courseTitle,
+        ),
+      ),
+    );
+    if (result == true) {
+      _loadLessons(); // Refresh after returning
+    }
   }
 }

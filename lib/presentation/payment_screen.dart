@@ -13,7 +13,7 @@ class PaymentScreen extends StatefulWidget {
     Key? key,
     required this.courseId,
     required this.courseTitle,
-    this.coursePrice = 0.0, // Default to free if not provided
+    this.coursePrice = 0.0,
   }) : super(key: key);
 
   @override
@@ -84,8 +84,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       builder: (context) => PaymentSuccessModal(
         courseTitle: widget.courseTitle,
         onClose: () {
-          Navigator.of(context).pop(); // Close modal
-          Navigator.of(context).pop(); // Return to previous screen
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
         },
       ),
     );

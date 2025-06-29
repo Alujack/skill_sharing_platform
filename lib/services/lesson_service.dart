@@ -98,6 +98,46 @@ class LessonService {
     }
   }
 
+  static Future<dynamic> updateLesson({
+    required String title,
+    required int lessonId,
+    required String videoFilePath,
+  }) async {
+    try {
+      print("id ==${title}");
+      var request = http.MultipartRequest(
+        'PUT',
+        Uri.parse("${AppConstants.lessonEndpoint}/$lessonId"),
+      );
+
+      // Add form fields
+      request.fields['title'] = title;
+
+      // Add video file
+      request.files
+          .add(await http.MultipartFile.fromPath('video', videoFilePath));
+
+      // Add headers if needed
+      request.headers.addAll(AppConstants.defaultHeaders);
+
+      // Send request
+      var streamedResponse = await request.send();
+
+      // Read response
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        // You can decode error response here if needed
+        return null;
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+/*
   static Future<dynamic> updateLesson(
       String lessonId, dynamic lessonData) async {
     try {
@@ -116,7 +156,7 @@ class LessonService {
       throw Exception(e.toString());
     }
   }
-
+*/
   static Future<bool> deleteLesson(String lessonId) async {
     try {
       final response = await http.delete(

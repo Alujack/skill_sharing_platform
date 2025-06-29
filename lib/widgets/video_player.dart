@@ -21,31 +21,49 @@ class VideoPlayerWidget extends StatefulWidget {
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
   bool _initialized = false;
-  bool _isFullScreen = false;
+  bool _isFullScreen =
+      false; // Keep track of full screen state within this widget
 
   @override
   void initState() {
     super.initState();
-    _initializePlayer();
+    _initializePlayer(widget.videoUrl); // Pass the initial URL
   }
 
-  Future<void> _initializePlayer() async {
-    final url = widget.videoUrl;
-    print("this is video == ${AppConstants.baseUrl}$url");
+  // This is CRITICAL for updating the video when the URL changes
+  @override
+  void didUpdateWidget(covariant VideoPlayerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.videoUrl != oldWidget.videoUrl) {
+      _controller.dispose(); // Dispose the old controller
+      _initialized = false; // Reset initialized state
+      _initializePlayer(
+          widget.videoUrl);
+    }
+  }
 
+  Future<void> _initializePlayer(String url) async {
+    print("Initializing video with URL: $url"); // Debugging
+
+    // Always assume it's a network URL now that MyCourseLearning handles full path construction
     try {
-      _controller = url.startsWith('http')
-          ? VideoPlayerController.network(url)
-          : VideoPlayerController.network("${AppConstants.baseUrl}$url");
+      _controller = VideoPlayerController.networkUrl(Uri.parse(url));
 
       await _controller.initialize();
-      _controller.setLooping(true);
+      _controller.setLooping(
+          true); // Typically you don't want looping for course lessons, but I'll leave it as you had it.
       if (widget.autoPlay) {
         _controller.play();
       }
-      setState(() => _initialized = true);
+      if (mounted) {
+        setState(() => _initialized = true);
+      }
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('Error initializing video player: $e');
+      if (mounted) {
+        setState(() => _initialized = false); // Indicate failure to initialize
+      }
+      // You might want to show an error message to the user here
     }
   }
 
@@ -65,12 +83,26 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         MaterialPageRoute(
           builder: (_) => FullScreenVideoPlayer(
             controller: _controller,
-            onExitFullScreen: () => (() => _isFullScreen = false),
+            // The onExitFullScreen callback should update the parent's _isFullScreen state.
+            // Your current line: `onExitFullScreen: () => (() => _isFullScreen = false),` is incorrect.
+            // It should be:
+            onExitFullScreen: () {
+              // This ensures that when the full-screen player is popped,
+              // the _isFullScreen state in the original widget updates.
+              setState(() => _isFullScreen = false);
+            },
           ),
           fullscreenDialog: true,
         ),
-      ).then((_) => setState(() => _isFullScreen = false));
-      setState(() => _isFullScreen = true);
+      ).then((_) {
+        // This .then() block handles when the full screen player is popped
+        // via the system back button or swiping back.
+        if (mounted) {
+          setState(() => _isFullScreen = false);
+        }
+      });
+      setState(
+          () => _isFullScreen = true); // Set to true immediately upon pushing
     }
   }
 

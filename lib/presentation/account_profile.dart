@@ -53,7 +53,9 @@ class AccountPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8),
-            if (authProvider.isAuthenticated && user!.role != 'Instructor')
+            if (authProvider.isAuthenticated &&
+                user!.role != 'Instructor' &&
+                user?.role != 'Student')
               GestureDetector(
                 onTap: () async {
                   final result = await showDialog<bool>(

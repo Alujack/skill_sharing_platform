@@ -64,7 +64,6 @@ class _CourseScreenState extends State<CourseScreen> {
           .toList();
     }
 
-  
     if (_activeFilter == 'Favourite') {
       // Implement favourite filter logic
     } else if (_activeFilter == 'Downloads') {
@@ -100,41 +99,41 @@ class _CourseScreenState extends State<CourseScreen> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                FilterButton(
-                  label: 'All',
-                  isActive: _activeFilter == 'All',
-                  onPressed: () {
-                    setState(() {
-                      _activeFilter = 'All';
-                    });
-                  },
-                ),
-                FilterButton(
-                  label: 'Downloads',
-                  isActive: _activeFilter == 'Downloads',
-                  onPressed: () {
-                    setState(() {
-                      _activeFilter = 'Downloads';
-                    });
-                  },
-                ),
-                FilterButton(
-                  label: 'Favourite',
-                  isActive: _activeFilter == 'Favourite',
-                  onPressed: () {
-                    setState(() {
-                      _activeFilter = 'Favourite';
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //     children: [
+          //       FilterButton(
+          //         label: 'All',
+          //         isActive: _activeFilter == 'All',
+          //         onPressed: () {
+          //           setState(() {
+          //             _activeFilter = 'All';
+          //           });
+          //         },
+          //       ),
+          //       FilterButton(
+          //         label: 'Downloads',
+          //         isActive: _activeFilter == 'Downloads',
+          //         onPressed: () {
+          //           setState(() {
+          //             _activeFilter = 'Downloads';
+          //           });
+          //         },
+          //       ),
+          //       FilterButton(
+          //         label: 'Favourite',
+          //         isActive: _activeFilter == 'Favourite',
+          //         onPressed: () {
+          //           setState(() {
+          //             _activeFilter = 'Favourite';
+          //           });
+          //         },
+          //       ),
+          //     ],
+          //   ),
+          // ),
 
           // Loading and error states
           if (_isLoading)
@@ -165,7 +164,7 @@ class _CourseScreenState extends State<CourseScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => MyCourseLearning(
-                              courseId: course['id'],
+                              courseId: course['course']['id'],
                             ),
                           ),
                         );
@@ -226,7 +225,7 @@ class CourseItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: ListTile(
         leading: Image.asset(
-          'assets/images/course.png', 
+          'assets/images/course.png',
           width: 50,
           height: 50,
           fit: BoxFit.cover,
@@ -238,7 +237,8 @@ class CourseItem extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(course['course']['instructor']?['name'] ?? 'Unknown Instructor'),
+            Text(course['course']['instructor']?['name'] ??
+                'Unknown Instructor'),
             const SizedBox(height: 4),
             const Text(
               'Start course',

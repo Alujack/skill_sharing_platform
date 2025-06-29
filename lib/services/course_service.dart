@@ -63,6 +63,7 @@ class CoursesService {
       throw Exception('Error: $e');
     }
   }
+
   static Future<List<dynamic>> searchCourses(String query) async {
     return getCourses(search: query);
   }
@@ -115,6 +116,52 @@ class CoursesService {
       }
     } catch (e) {
       throw Exception(e.toString());
+    }
+  }
+
+  static Future<dynamic> updateCourse(
+      int courseId, Map<String, dynamic> data) async {
+    try {
+      final response = await http.put(
+          Uri.parse(
+              '${AppConstants.coursesEndpoint}/$courseId'),
+          headers: AppConstants.defaultHeaders,
+          body: jsonEncode(data));
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          return responseData;
+        }
+        return {'success': true};
+      } else {
+        throw Exception(
+            'Failed to update course, status: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error updating course: ${e.toString()}');
+    }
+  }
+
+  static Future<dynamic> deleteCourse(int courseId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('${AppConstants.coursesEndpoint}/$courseId'),
+        headers: AppConstants.defaultHeaders,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          return responseData;
+        }
+        return {'success': true};
+      } else {
+        throw Exception(
+            'Failed to delete course, status: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error deleting course: ${e.toString()}');
     }
   }
 }

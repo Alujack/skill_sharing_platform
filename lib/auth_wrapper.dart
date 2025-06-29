@@ -24,7 +24,9 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        if (!authProvider.isAuthenticated || authProvider.user == null) {
+        if (!authProvider.isAuthenticated ||
+            authProvider.user == null ||
+            authProvider.user!.role == 'Admin') {
           return const LoginScreen();
         }
         final role = authProvider.user!.role;
@@ -32,7 +34,7 @@ class AuthWrapper extends StatelessWidget {
         if (role == 'User' || role == 'Student') {
           return const Core();
         } else if (role == 'Instructor') {
-          return const InstructorCore(); 
+          return const InstructorCore();
         } else {
           return const Scaffold(
             body: Center(child: Text('Unknown role')),

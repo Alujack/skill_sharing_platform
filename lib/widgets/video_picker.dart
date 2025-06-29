@@ -8,7 +8,7 @@ import 'package:video_compress/video_compress.dart' as vc;
 
 class VideoPickerWidget extends StatefulWidget {
   final Function(String url) onVideoSelected;
-  const VideoPickerWidget({super.key, required this.onVideoSelected});
+  const VideoPickerWidget({super.key, required this.onVideoSelected, required String initialVideoUrl});
 
   @override
   State<VideoPickerWidget> createState() => _VideoPickerWidgetState();

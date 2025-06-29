@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_sharing_platform/auth_provider.dart';
-import 'package:skill_sharing_platform/presentation/favourite_page.dart';
+import 'package:skill_sharing_platform/constants/app_constant.dart';
 import 'package:skill_sharing_platform/presentation/initial.dart';
 import 'package:skill_sharing_platform/presentation/payment_screen.dart';
-import 'package:skill_sharing_platform/services/enrollment_service.dart';
 import 'package:skill_sharing_platform/widgets/video_player.dart';
 import 'package:video_player/video_player.dart';
 import 'package:skill_sharing_platform/services/course_service.dart';
@@ -115,7 +114,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               if (courseData!['lessons'] != null &&
                   courseData!['lessons'].isNotEmpty)
                 VideoPlayerWidget(
-                    videoUrl: courseData!['lessons'][0]['videoUrl'])
+                    videoUrl: AppConstants.baseUrl +
+                        courseData!['lessons'][0]['videoUrl'])
               else
                 const Placeholder(
                   fallbackHeight: 200,
